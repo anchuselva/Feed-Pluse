@@ -137,4 +137,27 @@ export const apiService = {
     const payload = await handleResponse(response);
     return normalizeFeedback(payload.data);
   },
+
+  reanalyzeFeedback: async (id: string): Promise<Feedback> => {
+    const response = await fetch(buildUrl(`/api/feedback/${id}/analyze`), {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+
+    const payload = await handleResponse(response);
+    return normalizeFeedback(payload.data);
+  },
+
+  getWeeklySummary: async (): Promise<{ total: number; topCategory: string; topTags: string[]; summary: string }> => {
+    const response = await fetch(buildUrl('/api/feedback/weekly-summary'), {
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+
+    const payload = await handleResponse(response);
+    return payload.data;
+  },
 };

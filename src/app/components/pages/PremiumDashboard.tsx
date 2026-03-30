@@ -39,11 +39,20 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
   const [categoryFilter, setCategoryFilter] = useState<FeedbackCategory | ''>('');
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [weeklySummary, setWeeklySummary] = useState<{ total: number; topCategory: string; topTags: string[]; summary: string } | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [reanalyzingId, setReanalyzingId] = useState<string | null>(null);
   const user = apiService.getUser();
 
   useEffect(() => {
     loadFeedback();
   }, [categoryFilter, statusFilter, searchQuery]);
+
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      loadWeeklySummary();
+    }
+  }, [activeTab]);
 
   const loadFeedback = async () => {
     setLoading(true);
@@ -73,6 +82,37 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
       }
     } catch (error) {
       toast.error('Failed to update status');
+    }
+  };
+
+  const loadWeeklySummary = async () => {
+    setSummaryLoading(true);
+
+    try {
+      const summary = await apiService.getWeeklySummary();
+      setWeeklySummary(summary);
+    } catch (error) {
+      toast.error('Failed to load weekly summary');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleReanalyze = async (id: string) => {
+    setReanalyzingId(id);
+
+    try {
+      const updated = await apiService.reanalyzeFeedback(id);
+      toast.success('AI analysis refreshed');
+      loadFeedback();
+
+      if (selectedFeedback && selectedFeedback.id === id) {
+        setSelectedFeedback(updated);
+      }
+    } catch (error) {
+      toast.error('Failed to refresh AI analysis');
+    } finally {
+      setReanalyzingId(null);
     }
   };
 
@@ -141,7 +181,7 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="lg:pl-64 transition-all duration-300">
@@ -269,10 +309,60 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
           {/* Charts - Show only on dashboard and analytics tabs */}
           {(activeTab === 'dashboard' || activeTab === 'analytics') && !loading && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {activeTab === 'dashboard' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-2xl p-6 shadow-lg"
+                >
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly AI Summary</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Top feedback themes from the last 7 days.</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadWeeklySummary}
+                      disabled={summaryLoading}
+                    >
+                      {summaryLoading ? 'Refreshing...' : 'Refresh'}
+                    </Button>
+                  </div>
+
+                  {weeklySummary ? (
+                    <div className="space-y-4">
+                      <div className="rounded-2xl bg-indigo-50 dark:bg-indigo-950/20 p-4">
+                        <p className="text-sm text-gray-700 dark:text-gray-200">{weeklySummary.summary}</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="rounded-2xl bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-800">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Total submissions</p>
+                          <p className="text-2xl font-semibold text-gray-900 dark:text-white">{weeklySummary.total}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-800">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Top category</p>
+                          <p className="text-2xl font-semibold text-gray-900 dark:text-white">{weeklySummary.topCategory}</p>
+                        </div>
+                        <div className="rounded-2xl bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-800">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Top themes</p>
+                          <p className="text-2xl font-semibold text-gray-900 dark:text-white">{weeklySummary.topTags.join(', ') || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-gray-50 dark:bg-gray-800 p-6 border border-gray-200 dark:border-gray-700 text-center">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No weekly summary available yet. Click refresh to generate it.</p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.6 }}
                 className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-2xl p-6 shadow-lg"
               >
                 <div className="flex items-center gap-2 mb-6">
@@ -624,6 +714,19 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
                     <option value="In Review">In Review</option>
                     <option value="Resolved">Resolved</option>
                   </Select>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">AI Analysis</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleReanalyze(selectedFeedback.id)}
+                    disabled={reanalyzingId === selectedFeedback.id}
+                  >
+                    {reanalyzingId === selectedFeedback.id ? 'Re-analyzing...' : 'Re-run AI'}
+                  </Button>
                 </div>
 
                 {selectedFeedback.submitterEmail && (

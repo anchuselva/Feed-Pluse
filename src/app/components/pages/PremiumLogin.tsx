@@ -32,58 +32,27 @@ export function PremiumLogin({ onLoginSuccess }: PremiumLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 relative overflow-hidden">
-      {/* Animated Background Blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-1/4 -left-40 w-96 h-96 bg-gradient-to-r from-indigo-400/30 to-purple-400/30 dark:from-indigo-600/20 dark:to-purple-600/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            rotate: [0, -90, 0],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-1/4 -right-40 w-96 h-96 bg-gradient-to-r from-purple-400/30 to-pink-400/30 dark:from-purple-600/20 dark:to-pink-600/20 rounded-full blur-3xl"
-        />
-      </div>
-
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-10"
+            className="mb-10 rounded-[2rem] border border-slate-200 bg-white px-6 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white mb-6 shadow-2xl shadow-indigo-500/50"
-            >
-              <Shield className="w-10 h-10" />
-            </motion.div>
-
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-              Admin Login
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Access the FeedPulse dashboard
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-indigo-600 text-white">
+                <Shield className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600 dark:text-indigo-400">Admin Access</p>
+                <h1 className="mt-3 text-3xl font-semibold text-slate-900 dark:text-white">Sign in to FeedPulse</h1>
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+              Restrict access to product feedback management and AI review tools.
             </p>
           </motion.div>
 
@@ -92,7 +61,7 @@ export function PremiumLogin({ onLoginSuccess }: PremiumLoginProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-3xl shadow-2xl p-8"
+            className="rounded-[2rem] border border-slate-200 bg-white px-8 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="mb-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
@@ -121,7 +90,7 @@ export function PremiumLogin({ onLoginSuccess }: PremiumLoginProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
                   required
-                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all"
+                  className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400"
                 />
               </motion.div>
 
@@ -142,7 +111,7 @@ export function PremiumLogin({ onLoginSuccess }: PremiumLoginProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   required
-                  className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all"
+                  className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-400"
                 />
               </motion.div>
 
@@ -153,7 +122,7 @@ export function PremiumLogin({ onLoginSuccess }: PremiumLoginProps) {
               >
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 group"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow-md transition-all duration-300"
                   disabled={loading}
                 >
                   {loading ? (
