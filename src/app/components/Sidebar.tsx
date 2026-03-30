@@ -7,7 +7,6 @@ import {
   X,
   Moon,
   Sun,
-  Sparkles
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTheme } from './ThemeProvider';
@@ -27,6 +26,21 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     { id: 'feedback' as const, label: 'Feedback', icon: MessageSquare },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
   ];
+
+  const FeedPulseLogo = () => (
+    <svg viewBox="0 0 32 32" className="w-6 h-6" aria-hidden="true">
+      <circle cx="16" cy="16" r="15" fill="rgba(255,255,255,0.16)" />
+      <path
+        d="M5.5 20.5 L10 20.5 L13 14.5 L16 22.5 L19.5 12.5 L23 20.5 L26.5 20.5"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="26.5" cy="20.5" r="2" fill="currentColor" />
+    </svg>
+  );
 
   return (
     <>
@@ -49,12 +63,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
           {!collapsed && (
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/50">
-                <Sparkles className="w-5 h-5" />
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/40">
+                <FeedPulseLogo />
               </div>
               <div>
                 <h1 className="font-bold text-gray-900 dark:text-white">FeedPulse</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">AI-Powered</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Feedback, refined.</p>
               </div>
             </div>
           )}
