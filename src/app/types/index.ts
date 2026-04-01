@@ -37,6 +37,10 @@ export interface FeedbackFilters {
   category?: FeedbackCategory;
   status?: FeedbackStatus;
   search?: string;
+  sortBy?: 'createdAt' | 'ai_priority' | 'ai_sentiment';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
 }
 
 export interface DashboardStats {

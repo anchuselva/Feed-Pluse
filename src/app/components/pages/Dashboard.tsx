@@ -41,12 +41,12 @@ export function Dashboard({ onLogout }: DashboardProps) {
   const loadFeedback = async () => {
     setLoading(true);
     try {
-      const data = await apiService.getFeedback({
+      const { items } = await apiService.getFeedback({
         category: categoryFilter || undefined,
         status: statusFilter || undefined,
         search: searchQuery || undefined
       });
-      setFeedback(data);
+      setFeedback(items);
     } catch (error) {
       toast.error('Failed to load feedback');
     } finally {

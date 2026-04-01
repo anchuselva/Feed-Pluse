@@ -101,6 +101,7 @@ export const getFeedbackList = async (req, res) => {
   const pageNumber = Math.max(1, parseInt(page, 10));
   const pageSize = Math.min(50, Math.max(1, parseInt(limit, 10)));
 
+  const total = await Feedback.countDocuments(query);
   const feedbackItems = await Feedback.find(query)
     .sort({ [sort]: sortOrder })
     .skip((pageNumber - 1) * pageSize)
@@ -108,7 +109,10 @@ export const getFeedbackList = async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    data: feedbackItems.map((item) => mapFeedbackPayload(item)),
+    data: {
+      items: feedbackItems.map((item) => mapFeedbackPayload(item)),
+      total,
+    },
     error: null,
     message: 'Feedback list retrieved',
   });

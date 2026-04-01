@@ -98,11 +98,15 @@ export const apiService = {
     return normalizeFeedback(payload.data);
   },
 
-  getFeedback: async (filters?: FeedbackFilters): Promise<Feedback[]> => {
+  getFeedback: async (filters?: FeedbackFilters): Promise<{ items: Feedback[]; total: number }> => {
     const response = await fetch(buildUrl('/api/feedback', {
       category: filters?.category,
       status: filters?.status,
       search: filters?.search,
+      sort: filters?.sortBy,
+      order: filters?.sortOrder,
+      page: filters?.page?.toString(),
+      limit: filters?.limit?.toString(),
     }), {
       headers: {
         ...getAuthHeaders(),
@@ -110,7 +114,13 @@ export const apiService = {
     });
 
     const payload = await handleResponse(response);
-    return payload.data.map((item: any) => normalizeFeedback(item));
+    const items = (payload.data?.items ?? payload.data ?? []) as any[];
+    const total = typeof payload.data?.total === 'number' ? payload.data.total : items.length;
+
+    return {
+      items: items.map((item: any) => normalizeFeedback(item)),
+      total,
+    };
   },
 
   getFeedbackById: async (id: string): Promise<Feedback | null> => {

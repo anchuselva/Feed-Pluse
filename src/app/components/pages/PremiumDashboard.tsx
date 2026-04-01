@@ -39,14 +39,22 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
   const [categoryFilter, setCategoryFilter] = useState<FeedbackCategory | ''>('');
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'ai_priority' | 'ai_sentiment'>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [weeklySummary, setWeeklySummary] = useState<{ total: number; topCategory: string; topTags: string[]; summary: string } | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [reanalyzingId, setReanalyzingId] = useState<string | null>(null);
   const user = apiService.getUser();
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, statusFilter, searchQuery, sortBy, sortOrder]);
+
+  useEffect(() => {
     loadFeedback();
-  }, [categoryFilter, statusFilter, searchQuery]);
+  }, [categoryFilter, statusFilter, searchQuery, sortBy, sortOrder, currentPage]);
 
   useEffect(() => {
     if (activeTab === 'dashboard') {
@@ -57,12 +65,17 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
   const loadFeedback = async () => {
     setLoading(true);
     try {
-      const data = await apiService.getFeedback({
+      const { items, total } = await apiService.getFeedback({
         category: categoryFilter || undefined,
         status: statusFilter || undefined,
-        search: searchQuery || undefined
+        search: searchQuery || undefined,
+        sortBy,
+        sortOrder,
+        page: currentPage,
+        limit: 10,
       });
-      setFeedback(data);
+      setFeedback(items);
+      setTotalItems(total);
     } catch (error) {
       toast.error('Failed to load feedback');
     } finally {
@@ -179,6 +192,16 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
     if (priority >= 5) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-green-600 dark:text-green-400';
   };
+
+  const pageSize = 10;
+  const pageCount = Math.max(1, Math.ceil(totalItems / pageSize));
+  const paginationLabel = `${totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalItems)} of ${totalItems}`;
+
+  useEffect(() => {
+    if (currentPage > pageCount) {
+      setCurrentPage(pageCount);
+    }
+  }, [currentPage, pageCount]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -448,7 +471,7 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
               transition={{ delay: 0.5 }}
               className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-2xl p-6 shadow-lg"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
@@ -481,6 +504,26 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
                   <option value="In Review">In Review</option>
                   <option value="Resolved">Resolved</option>
                 </Select>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'ai_priority' | 'ai_sentiment')}
+                    className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700"
+                  >
+                    <option value="createdAt">Sort by date</option>
+                    <option value="ai_priority">Sort by priority</option>
+                    <option value="ai_sentiment">Sort by sentiment</option>
+                  </Select>
+                  <Select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700"
+                  >
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                  </Select>
+                </div>
               </div>
 
               {(categoryFilter || statusFilter || searchQuery) && (
@@ -537,6 +580,30 @@ export function PremiumDashboard({ onLogout }: PremiumDashboardProps) {
                 </div>
               )}
             </motion.div>
+          )}
+
+          {totalItems > pageSize && (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-2xl p-4 shadow-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Showing {paginationLabel}</p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === pageCount}
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
 
           {/* Feedback List */}
